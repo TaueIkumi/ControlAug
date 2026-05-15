@@ -1,0 +1,6 @@
+[submodule "ControlNet"]
+	path = ControlNet
+	url = https://github.com/FANGAreNotGnu/ControlNet.git
+[submodule "mmdetection"]
+	path = mmdetection
+	url = https://github.com/FANGAreNotGnu/mmdetection.git

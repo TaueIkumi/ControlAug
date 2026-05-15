@@ -16,7 +16,7 @@ class PromptConstructor:
     def generate_blip_prompts(self, img, prompt_mode=None):
         if prompt_mode is None:
             prompt_mode = self.prompt_mode
-        if prompt_mode == "blip_large":
+        if prompt_mode == "blip_large" or prompt_mode == "blip_large_coco": 
             model_name = "Salesforce/blip-image-captioning-large"
         elif prompt_mode == "blip_base":
             model_name = "Salesforce/blip-image-captioning-base"

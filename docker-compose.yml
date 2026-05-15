@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  clip:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.clip
+    image: controlaug:clip
+    container_name: controlaug_clip
+    volumes:
+      - .:/workspace
+      - data:/workspace/data
+      - ./data:/media/data
+      - .:/media/wacv
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/workspace:/workspace/../ControlNet
+      - ControlAug_DATA_DIR=/media/data
+      - ControlAug_CODE_DIR=/media/wacv
+      - CNET_MODEL_DIR=/media/wacv/ControlNet/models
+
+  diffuser:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.diffuser
+    image: controlaug:diffuser
+    container_name: controlaug_diffuser
+    volumes:
+      - .:/workspace
+      - data:/workspace/data
+      - ./data:/media/data
+      - .:/media/wacv
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/workspace:/workspace/../ControlNet
+      - ControlAug_DATA_DIR=/media/data
+      - ControlAug_CODE_DIR=/media/wacv
+      - CNET_MODEL_DIR=/media/wacv/ControlNet/models
+
+  mmdet:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mmdet
+    image: controlaug:mmdet
+    container_name: controlaug_mmdet
+    volumes:
+      - .:/workspace
+      - data:/workspace/data
+      - ./data:/media/data
+      - .:/media/wacv
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/workspace:/workspace/../ControlNet
+      - ControlAug_DATA_DIR=/media/data
+      - ControlAug_CODE_DIR=/media/wacv
+      - CNET_MODEL_DIR=/media/wacv/ControlNet/models
+
+  control:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.control
+    image: controlaug:control
+    container_name: controlaug_control
+    volumes:
+      - .:/workspace
+      - data:/workspace/data
+      - ./data:/media/data
+      - .:/media/wacv
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/workspace:/workspace/../ControlNet
+      - ControlAug_DATA_DIR=/media/data
+      - ControlAug_CODE_DIR=/media/wacv
+      - CNET_MODEL_DIR=/media/wacv/ControlNet/models
+
+  xpaste:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.xpaste
+    image: controlaug:xpaste
+    container_name: controlaug_xpaste
+    volumes:
+      - .:/workspace
+      - data:/workspace/data
+      - ./data:/media/data
+      - .:/media/wacv
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/workspace:/workspace/../ControlNet
+      - ControlAug_DATA_DIR=/media/data
+      - ControlAug_CODE_DIR=/media/wacv
+      - CNET_MODEL_DIR=/media/wacv/ControlNet/models
+
+volumes:
+  data:
+    driver: local

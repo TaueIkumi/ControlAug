@@ -1,0 +1,32 @@
+# Base image with CUDA and Python
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    CONDA_DIR=/opt/conda \
+    PATH="${CONDA_DIR}/bin:$PATH"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    git \
+    wget \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Miniconda
+RUN curl -sSL https://anaconda.com -o miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p ${CONDA_DIR} && \
+    rm /tmp/miniconda.sh && \
+    conda clean -afy
+
+# Create workspace directory
+WORKDIR /workspace
+
+# Update conda and pip
+RUN conda update -n base -c defaults conda && \
+    conda install -y pip setuptools

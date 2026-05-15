@@ -1,0 +1,66 @@
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/workspace:/workspace/../ControlNet
+
+# Install system dependencies including Python
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    git \
+    wget \
+    unzip \
+    aria2 \
+    libssl-dev \
+    libffi-dev \
+    python3.9 \
+    python3-dev \
+    python3-pip \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    python3-opencv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create symbolic links for python if missing
+RUN if [ ! -e /usr/bin/python ]; then ln -s /usr/bin/python3.9 /usr/bin/python; fi && \
+    if [ ! -e /usr/bin/python3 ]; then ln -s /usr/bin/python3.9 /usr/bin/python3; fi
+
+# Provide a fast downloader by wrapping `wget` to use `aria2c` with parallel connections
+RUN printf '#!/bin/bash\nif [ "$#" -eq 0 ]; then exec /usr/bin/wget; fi\n# Forward all args to aria2c using multiple connections\nexec aria2c -x16 -s16 -k1M --file-allocation=trunc "$@"\n' > /usr/local/bin/wget && \
+    chmod +x /usr/local/bin/wget
+
+WORKDIR /workspace
+
+# Upgrade pip and install all Python deps with explicit pins to avoid resolver upgrades
+RUN pip install --upgrade pip setuptools wheel
+
+# Install from requirements.txt to lock versions
+COPY requirements/diffuser_requirements.txt /workspace/
+RUN pip install --no-cache-dir -r /workspace/diffuser_requirements.txt
+
+# Verify installed versions (for debugging during build)
+RUN python3 - <<'PY'
+import sys
+import pkgutil
+import importlib
+print('python', sys.version)
+for m in ('numpy','torch','torchvision','torchaudio','open_clip','open_clip_torch','clip','pytorch_lightning'):
+    try:
+        mod = importlib.import_module(m)
+        print(m, getattr(mod,'__version__', 'ok'))
+    except Exception as e:
+        print(m, 'missing or error', e)
+PY
+
+# Create a no-op conda shim so scripts that source conda files or call `conda activate` won't fail
+RUN mkdir -p /opt/conda/etc/profile.d && \
+    printf '#!/bin/bash\n# no-op conda profile shim for containerized runs\n' > /opt/conda/etc/profile.d/conda.sh && \
+    chmod +x /opt/conda/etc/profile.d/conda.sh && \
+    printf '#!/bin/bash\ncase "$1" in\n  activate|deactivate) exit 0 ;;\n  *) echo "conda shim: no-op" >&2; exit 0 ;;\nesac\n' > /usr/local/bin/conda && \
+    chmod +x /usr/local/bin/conda
+
+CMD ["/bin/bash"]
