@@ -3,8 +3,8 @@ version: '3.8'
 services:
   clip:
     build:
-      context: .
-      dockerfile: docker/Dockerfile.clip
+      context: docker
+      dockerfile: Dockerfile.clip
     image: controlaug:clip
     container_name: controlaug_clip
     volumes:
@@ -25,13 +25,13 @@ services:
 
   diffuser:
     build:
-      context: .
-      dockerfile: docker/Dockerfile.diffuser
+      context: docker
+      dockerfile: Dockerfile.diffuser
     image: controlaug:diffuser
     container_name: controlaug_diffuser
     volumes:
       - .:/workspace
-      - data:/workspace/data
+      - ./data:/workspace/data
       - ./data:/media/data
       - .:/media/wacv
     working_dir: /workspace
@@ -47,8 +47,8 @@ services:
 
   mmdet:
     build:
-      context: .
-      dockerfile: docker/Dockerfile.mmdet
+      context: docker
+      dockerfile: Dockerfile.mmdet
     image: controlaug:mmdet
     container_name: controlaug_mmdet
     volumes:
@@ -69,8 +69,8 @@ services:
 
   control:
     build:
-      context: .
-      dockerfile: docker/Dockerfile.control
+      context: docker
+      dockerfile: Dockerfile.control
     image: controlaug:control
     container_name: controlaug_control
     volumes:
@@ -91,8 +91,8 @@ services:
 
   xpaste:
     build:
-      context: .
-      dockerfile: docker/Dockerfile.xpaste
+      context: docker
+      dockerfile: Dockerfile.xpaste
     image: controlaug:xpaste
     container_name: controlaug_xpaste
     volumes:

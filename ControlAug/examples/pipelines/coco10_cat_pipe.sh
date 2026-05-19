@@ -20,11 +20,11 @@ PROMPTMODE=$7
 FILTERRATIO=$8
 #CKPT_NAME=control_sd15_hed.pth
 CKPT_NAME=$9
+GENERATION_SEED=$(date +%s)
 
-syn_file="/media/data/ControlAug/cnet/experiments/coco${SHOT}s1_${IMSIZE}p/syn_n${NUM_IMG}_${VSP}_p${IMSIZE}_pr${PROMPTMODE}_dfsNone_seed${SEED}_imprior"
-mix_file="/media/data/ControlAug/cnet/experiments/coco${SHOT}s1_${IMSIZE}p/mix_n${NUM_IMG}_${VSP}_p${IMSIZE}_pr${PROMPTMODE}_dfsNone_seed${SEED}_imprior"
-filtered_file="/media/data/ControlAug/cnet/experiments/coco${SHOT}s1_${IMSIZE}p/mix_n${NUM_IMG}_${VSP}_p${IMSIZE}_pr${PROMPTMODE}_dfsNone_seed${SEED}_imprior_avgacsl${FILTERRATIO}"
-
+syn_file="/media/data/ControlAug/cnet/experiments/coco${SHOT}s1_${IMSIZE}p/syn_n${NUM_IMG}_${VSP}_p${IMSIZE}_pr${PROMPTMODE}_dfsNone_seed${GENERATION_SEED}_imprior/"
+mix_file="/media/data/ControlAug/cnet/experiments/coco${SHOT}s1_${IMSIZE}p/mix_n${NUM_IMG}_${VSP}_p${IMSIZE}_pr${PROMPTMODE}_dfsNone_dseed${SEED}_gseed${GENERATION_SEED}_imprior"
+filtered_file="/media/data/ControlAug/cnet/experiments/coco${SHOT}s1_${IMSIZE}p/mix_n${NUM_IMG}_${VSP}_p${IMSIZE}_pr${PROMPTMODE}_dfsNone_dseed${SEED}_gseed${GENERATION_SEED}_imprior_avgacsl${FILTERRATIO}"
 
 cd "/media/wacv"
 cd ControlAug
@@ -42,7 +42,7 @@ CUDA_VISIBLE_DEVICES=${GPU} python3 generate_with_imprior.py \
         -m 0 \
         --vpg_mode ${VSP} \
         --ckpt_path /media/wacv/ControlNet/models/${CKPT_NAME} \
-        --seed ${SEED} \
+        --seed ${GENERATION_SEED} \
         --prompt_mode ${PROMPTMODE}
         
 python3 mix_annotations.py \
@@ -56,6 +56,8 @@ conda deactivate
 conda activate ControlAug_clip
 CUDA_VISIBLE_DEVICES=${GPU} python3 calculate_clip_score.py \
         -d ${mix_file}
+
+sleep 10
 
 python3 filter_annotations.py \
         -d ${mix_file} \

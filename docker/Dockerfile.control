@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     libssl-dev \
     libffi-dev \
+    pkg-config \
+    libfuse-dev \
     python3.9 \
     python3-pip \
     ffmpeg \
@@ -33,6 +35,12 @@ RUN pip install --upgrade pip setuptools wheel
 
 # Install from requirements.txt to lock versions
 COPY requirements/control_requirements.txt /app/
-RUN conda run -n ControlAug_control pip install --no-cache-dir -r /app/control_requirements.txt
+RUN pip install --no-cache-dir \
+    torch==2.0.1+cu118 \
+    torchvision==0.15.2+cu118 \
+    torchaudio==2.0.2+cu118 \
+    --extra-index-url https://download.pytorch.org/whl/cu118
+    
+RUN pip install --no-cache-dir -r /app/control_requirements.txt
 
 CMD ["/bin/bash"]

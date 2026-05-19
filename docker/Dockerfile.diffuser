@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     unzip \
     aria2 \
+    pkg-config \
+    libfuse-dev \
     libssl-dev \
     libffi-dev \
     python3.9 \
@@ -40,21 +42,27 @@ RUN pip install --upgrade pip setuptools wheel
 
 # Install from requirements.txt to lock versions
 COPY requirements/diffuser_requirements.txt /workspace/
+RUN pip install --no-cache-dir \
+    torch==2.0.1+cu118 \
+    torchvision==0.15.2+cu118 \
+    torchaudio==2.0.2+cu118 \
+    --extra-index-url https://download.pytorch.org/whl/cu118
+    
 RUN pip install --no-cache-dir -r /workspace/diffuser_requirements.txt
 
-# Verify installed versions (for debugging during build)
-RUN python3 - <<'PY'
-import sys
-import pkgutil
-import importlib
-print('python', sys.version)
-for m in ('numpy','torch','torchvision','torchaudio','open_clip','open_clip_torch','clip','pytorch_lightning'):
-    try:
-        mod = importlib.import_module(m)
-        print(m, getattr(mod,'__version__', 'ok'))
-    except Exception as e:
-        print(m, 'missing or error', e)
-PY
+# # Verify installed versions (for debugging during build)
+# RUN python3 - <<'PY'
+# import sys
+# import pkgutil
+# import importlib
+# print('python', sys.version)
+# for m in ('numpy','torch','torchvision','torchaudio','open_clip','open_clip_torch','clip','pytorch_lightning'):
+#     try:
+#         mod = importlib.import_module(m)
+#         print(m, getattr(mod,'__version__', 'ok'))
+#     except Exception as e:
+#         print(m, 'missing or error', e)
+# PY
 
 # Create a no-op conda shim so scripts that source conda files or call `conda activate` won't fail
 RUN mkdir -p /opt/conda/etc/profile.d && \
